@@ -17,19 +17,22 @@ export default {
     app.registerPlugin(plugin);
 
     app.customFields.register({
-      name: "location-picker",
+      name: 'location-picker',
       pluginId,
-      type: "json", // the color will be stored as a string
+      type: 'json', // the color will be stored as a string
       intlLabel: {
-        id: "maplibre-maps.location-picker.label",
-        defaultMessage: "Location picker",
+        id: 'maplibre-maps.location-picker.label',
+        defaultMessage: 'Location picker',
       },
       intlDescription: {
-        id: "maplibre-maps.location-picker.description",
-        defaultMessage: "Maplibre based location picker",
+        id: 'maplibre-maps.location-picker.description',
+        defaultMessage: 'Maplibre based location picker',
       },
       components: {
-        Input: async () => import(/* webpackChunkName: "input-component" */ "./components/MapPicker"),
+        Input: async () =>
+          import(
+            /* webpackChunkName: "input-component" */ './components/Input'
+          ),
       },
       options: {
         // declare options here

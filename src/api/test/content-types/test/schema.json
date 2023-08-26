@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tests",
+  "info": {
+    "singularName": "test",
+    "pluralName": "tests",
+    "displayName": "Test"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "testlocation": {
+      "type": "customField",
+      "customField": "plugin::maplibre-maps.location-picker"
+    }
+  }
+}
