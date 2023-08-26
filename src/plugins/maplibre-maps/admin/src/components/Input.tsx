@@ -1,12 +1,12 @@
 import React from 'react';
 import { MapComponentsProvider } from '@musaev/react-maplibre';
-import { MapPicker } from './MapPicker';
+import { LocationPicker } from './LocationPicker';
 
 function Input(props) {
   const { name, attribute, value, onChange } = props;
   return (
     <MapComponentsProvider>
-      <MapPicker
+      <LocationPicker
         name={name}
         attribute={attribute}
         value={value}

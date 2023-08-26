@@ -18,7 +18,7 @@ export default {
 
     app.customFields.register({
       name: 'location-picker',
-      pluginId,
+      pluginId: 'maplibre-maps',
       type: 'json', // the color will be stored as a string
       intlLabel: {
         id: 'maplibre-maps.location-picker.label',

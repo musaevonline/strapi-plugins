@@ -15,7 +15,7 @@ export interface IMapPickerProps {
   onChange: Function;
 }
 
-export const MapPicker: React.FC<IMapPickerProps> = (props) => {
+export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   const { name, attribute, value: defaultValue, onChange } = props;
   const mapHook = useMap({ mapId: 'map' });
   const markerRef = useRef<maplibregl.Marker>();
