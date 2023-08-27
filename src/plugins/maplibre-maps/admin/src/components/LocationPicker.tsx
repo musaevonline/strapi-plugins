@@ -19,24 +19,24 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   const { name, attribute, value: defaultValue, onChange } = props;
   const mapHook = useMap({ mapId: 'map' });
   const markerRef = useRef<maplibregl.Marker>();
-  const addressRef = useRef<any>(null);
-  const [value, setValue] = useState<any>(tryParse(defaultValue) || {});
-  const [manual, setManual] = useState(false);
+  const parsed = tryParse(defaultValue) || {};
+  const [coords, setCoords] = useState<[number, number]>(parsed.coords);
+  const [address, setAddress] = useState<string>(parsed.address);
+  const [manual, setManual] = useState(parsed.manual);
+  const changed = useRef(false);
 
   const mapOptions = {
-    zoom: value.coords.length === 2 ? 15 : 7,
+    zoom: coords?.length === 2 ? 15 : 7,
     style: 'https://wms.wheregroup.com/tileserver/style/osm-bright.json',
     center:
-      value.coords.length === 2
-        ? value.coords
-        : ([47.9155, 42.467] as [number, number]),
+      coords?.length === 2 ? coords : ([47.9155, 42.467] as [number, number]),
   };
 
   useEffect(() => {
     if (!mapHook?.map) return;
-    if (value?.coords?.length === 2) {
+    if (coords?.length === 2) {
       markerRef.current = new maplibregl.Marker()
-        .setLngLat(value.coords)
+        .setLngLat(coords)
         .addTo(mapHook.map);
     }
 
@@ -51,26 +51,7 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
       markerRef.current = new maplibregl.Marker()
         .setLngLat(lngLat)
         .addTo(mapHook.map);
-      fetch(
-        `https://nominatim.openstreetmap.org/reverse.php?lat=${e.lngLat.lat}&lon=${e.lngLat.lng}&zoom=18&format=jsonv2`,
-      )
-        .then((res) => res.json())
-        .then((address) => {
-          const houseNumber = address?.address?.house_number;
-          const street = address?.address?.road || address?.address?.suburb;
-          const city =
-            address?.address?.city ||
-            address?.address?.county ||
-            address?.address?.state ||
-            address?.address?.region;
-
-          if (!city || !street || !address?.lat || !address?.lon) return;
-          setValue({
-            address: [city, street, houseNumber].join(', '),
-            coords: [+address.lon, +address.lat],
-          });
-        })
-        .catch(console.error);
+      syncAddress([e.lngLat.lng, e.lngLat.lat]);
     };
 
     mapHook.map.on('click', handler);
@@ -84,22 +65,20 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   }, [mapHook.map]);
 
   useEffect(() => {
-    applyChange();
-    if (!value?.address || !addressRef.current?.input?.current || manual)
-      return;
-    addressRef.current.input.current.value = value.address;
-  }, [value, manual]);
+    if (!manual && coords.length === 2) syncAddress(coords);
+  }, [manual]);
 
-  const applyChange = () => {
-    const address = manual
-      ? addressRef?.current?.input?.current?.value
-      : value?.address;
+  useEffect(() => {
+    if (address !== parsed.address) changed.current = true;
+  }, [address]);
 
-    if (!address || !value?.coords?.length) return;
+  useEffect(() => {
+    if (!address || !coords?.length || !changed.current) return;
 
     const result = {
       address,
-      coords: value.coords,
+      coords,
+      manual,
     };
 
     onChange({
@@ -109,18 +88,38 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
         type: attribute.type, // json
       },
     });
+  }, [address, coords, manual]);
+
+  const syncAddress = ([lng, lat]: [number, number]) => {
+    fetch(
+      `https://nominatim.openstreetmap.org/reverse.php?lat=${lat}&lon=${lng}&zoom=18&format=jsonv2`,
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        const houseNumber = res?.address?.house_number;
+        const street = res?.address?.road || res?.address?.suburb;
+        const city =
+          res?.address?.city ||
+          res?.address?.county ||
+          res?.address?.state ||
+          res?.address?.region;
+        console.log(city, street, res?.lat, res?.lon);
+        if (!city || !res?.lat || !res?.lon) return;
+        setAddress([city, street, houseNumber].filter(Boolean).join(', '));
+        setCoords([+res.lon, +res.lat]);
+      })
+      .catch(console.error);
   };
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
       <div>
         <TextInput
-          ref={addressRef}
           label="Адрес"
-          defaultValue={value?.address}
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
           placeholder="Поставьте точку на карте"
           disabled={!manual}
-          onChange={applyChange}
         />
         <div
           style={{

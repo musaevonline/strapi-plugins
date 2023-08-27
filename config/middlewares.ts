@@ -1,6 +1,19 @@
 export default [
   'strapi::errors',
-  'strapi::security',
+  {
+    name: 'strapi::security',
+    config: {
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'worker-src': ["'self'", 'blob:'],
+        },
+      },
+      referrerPolicy: {
+				policy: 'origin-when-cross-origin',
+			},
+    },
+  },
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
