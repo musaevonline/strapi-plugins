@@ -21,7 +21,9 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   const mapHook = useMap({ mapId: 'map' });
   const markerRef = useRef<maplibregl.Marker>();
   const parsed = tryParse(defaultValue) || {};
-  const [coords, setCoords] = useState<[number, number]>(parsed.coords);
+  const [coords, setCoords] = useState<[number, number] | undefined>(
+    parsed.lng && parsed.lat ? [parsed.lng, parsed.lat] : undefined,
+  );
   const [address, setAddress] = useState<string>(parsed.address);
   const [manual, setManual] = useState(parsed.manual);
   const changed = useRef(false);
@@ -74,14 +76,15 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   }, [address]);
 
   useEffect(() => {
-    if (!address || !coords?.length || !changed.current) return;
+    if (!address || coords?.length !== 2 || !changed.current) return;
 
     const result = {
       address,
-      coords,
+      lng: coords[0],
+      lat: coords[1],
       manual,
     };
-
+    console.log(result);
     onChange({
       target: {
         name,
@@ -97,10 +100,13 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
     )
       .then((res) => res.json())
       .then((res) => {
+        console.log(res);
         const houseNumber = res?.address?.house_number;
         const street = res?.address?.road || res?.address?.suburb;
         const city =
           res?.address?.city ||
+          res?.address?.town ||
+          res?.address?.city_district ||
           res?.address?.county ||
           res?.address?.state ||
           res?.address?.region;
