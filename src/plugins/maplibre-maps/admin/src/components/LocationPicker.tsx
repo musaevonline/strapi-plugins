@@ -11,12 +11,13 @@ import { TextInput, Checkbox } from '@strapi/design-system';
 export interface IMapPickerProps {
   name: string;
   attribute: any;
-  value: any;
+  required: boolean;
+  value: string;
   onChange: Function;
 }
 
 export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
-  const { name, attribute, value: defaultValue, onChange } = props;
+  const { name, attribute, required, value: defaultValue, onChange } = props;
   const mapHook = useMap({ mapId: 'map' });
   const markerRef = useRef<maplibregl.Marker>();
   const parsed = tryParse(defaultValue) || {};
@@ -65,7 +66,7 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
   }, [mapHook.map]);
 
   useEffect(() => {
-    if (!manual && coords.length === 2) syncAddress(coords);
+    if (!manual && coords?.length === 2) syncAddress(coords);
   }, [manual]);
 
   useEffect(() => {
@@ -120,6 +121,7 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Поставьте точку на карте"
           disabled={!manual}
+          required={required}
         />
         <div
           style={{
@@ -129,7 +131,11 @@ export const LocationPicker: React.FC<IMapPickerProps> = (props) => {
             marginTop: 8,
           }}
         >
-          <Checkbox value={manual} onValueChange={(v) => setManual(v)}>
+          <Checkbox
+            value={manual}
+            disabled={coords?.length !== 2}
+            onValueChange={(v) => setManual(v)}
+          >
             Задать адрес вручную
           </Checkbox>
         </div>

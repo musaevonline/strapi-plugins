@@ -4,7 +4,8 @@
   "info": {
     "singularName": "test",
     "pluralName": "tests",
-    "displayName": "Test"
+    "displayName": "Test",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -13,7 +14,15 @@
   "attributes": {
     "testlocation": {
       "type": "customField",
-      "customField": "plugin::maplibre-maps.location-picker"
+      "customField": "plugin::maplibre-maps.location-picker",
+      "required": false
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "d": {
+      "type": "string"
     }
   }
 }
